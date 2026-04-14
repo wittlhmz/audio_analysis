@@ -14,6 +14,12 @@ Die Datengrundlage dieses Projekts basiert auf einer persönlichen Musikbiblioth
 - Die extrahierten Daten wurden in einer Datenbank gespeichert
 - Enthalten sind Informationen wie Künstler, Titel, Erscheinungsjahr und weitere Infos
 
+Hier ist einmal ein Ausschnitt aus der Datenbank mit DB Browser abgebildet:
+
+<p align="center">
+  <img src="db.png" width="800"/>
+</p>
+
 ---
 
 ## Datenaufbereitung
