@@ -38,9 +38,11 @@ Dazu gehören:
 
 Bei der Dimensionsreduktion werden hochdimensionale Daten auf zwei Dimensionen projiziert, um sie visuell darstellen zu können. Jeder Punkt entspricht einem Song, die Farbe zeigt das Genre. Die Features für alle Methoden sind: Genre (One-Hot-kodiert), Erscheinungsjahr und Länge des Songs.
 
-### PCA – Principal Component Analysis
+### Principal Component Analysis
 
 PCA ist eine lineare Methode, die die Richtungen mit der größten Varianz in den Daten sucht und die Daten entlang dieser Achsen projiziert. Sie ist schnell, deterministisch und gut interpretierbar – zeigt jedoch nur lineare Strukturen.
+
+Im Ergebnis bilden Electronic (blau), Dance (grün) und Pop (orange) jeweils klar erkennbare, diagonale Streifen. Die kleineren Genres häufen sich dazwischen in der Mitte. Die diagonalen Linien entstehen dadurch, dass Songs innerhalb eines Genres sich nur in Jahr und Länge unterscheiden – das ergibt zwangsläufig eine lineare Anordnung. Insgesamt zeigt die PCA gut, dass Genre der dominante Faktor ist, die kleineren Genres verschwimmen aber.
 
 <p align="center">
   <img src="plots/pca.png" width="800"/>
@@ -48,9 +50,9 @@ PCA ist eine lineare Methode, die die Richtungen mit der größten Varianz in de
 
 ---
 
-### t-SNE – t-distributed Stochastic Neighbor Embedding
+### t-SNE 
 
-t-SNE ist eine nicht-lineare Methode, die darauf ausgelegt ist, lokale Nachbarschaftsstrukturen zu erhalten. Songs, die sich ähneln, landen nah beieinander. Das Ergebnis ist zufällig (kein deterministischer Algorithmus) und eignet sich besonders gut zur Visualisierung von Clustern – jedoch nicht für Distanzvergleiche zwischen Clustern.
+t-SNE ist darauf ausgelegt, lokale Nachbarschaftsstrukturen zu erhalten. Demnach landen Songs, die sich ähneln, nah beieinander. In diesem Projekt bringt diese Methode keine wirklich neuen Erkenntnisse, da einfach nach Genre geclustert wird. Immerhin werden die einzelnen Cluster gut visualisiert ¯\_(ツ)_/¯
 
 <p align="center">
   <img src="plots/tsne.png" width="800"/>
@@ -62,6 +64,8 @@ t-SNE ist eine nicht-lineare Methode, die darauf ausgelegt ist, lokale Nachbarsc
 
 Isomap erweitert MDS (Multidimensional Scaling) um geodätische Abstände: Statt gerader Linien durch den Raum werden Abstände entlang des Datengraphen berechnet. Damit eignet sich Isomap besonders für Daten, die auf gekrümmten Mannigfaltigkeiten liegen.
 
+Das Ergebnis ist das interpretierbarste der vier Methoden: Die Genres sind sauber voneinander getrennt und in klar erkennbaren Gruppen angeordnet. Besonders auffällig sind die fast perfekt geraden Linien innerhalb eines Genres. Das ist kein Zufall, sondern ein Artefakt des One-Hot-Encodings – Songs desselben Genres unterscheiden sich nur in Jahr und Länge, sie liegen also auf einer eindimensionalen Linie im Feature-Raum. Isomap macht diese Struktur am deutlichsten sichtbar.
+
 <p align="center">
   <img src="plots/isomap.png" width="800"/>
 </p>
@@ -71,6 +75,8 @@ Isomap erweitert MDS (Multidimensional Scaling) um geodätische Abstände: Statt
 ### Spectral Embedding
 
 Spectral Embedding baut einen Ähnlichkeitsgraphen zwischen den Datenpunkten auf und berechnet daraus die Eigenvektoren der Laplace-Matrix. Es ist verwandt mit Spectral Clustering und eignet sich für nicht-konvexe, zusammenhängende Strukturen.
+
+Das Ergebnis ist leider wenig aufschlussreich. Fast alle Genres werden in die untere linke Ecke gequetscht – nur Dance (grün) wird weit nach rechts herausgezogen. Das ist ein bekanntes Problem von Spectral Embedding: Wenn ein Cluster intern sehr dicht verbunden ist (Dance mit 149 Songs ist der zweitgrößte), kann er das gesamte Embedding verzerren. Für diesen Datensatz ist die Methode deshalb kaum geeignet.
 
 <p align="center">
   <img src="plots/spectral_embedding.png" width="800"/>
