@@ -48,16 +48,6 @@ PCA ist eine lineare Methode, die die Richtungen mit der größten Varianz in de
 
 ---
 
-### Randomized PCA
-
-Randomized PCA ist eine approximierte Variante der klassischen PCA. Sie verwendet Zufallsprojektion, um die Berechnung zu beschleunigen – bei kleinen Datensätzen ist der Unterschied minimal, bei großen Datenmengen jedoch deutlich spürbar.
-
-<p align="center">
-  <img src="plots/pca_randomized.png" width="800"/>
-</p>
-
----
-
 ### t-SNE – t-distributed Stochastic Neighbor Embedding
 
 t-SNE ist eine nicht-lineare Methode, die darauf ausgelegt ist, lokale Nachbarschaftsstrukturen zu erhalten. Songs, die sich ähneln, landen nah beieinander. Das Ergebnis ist zufällig (kein deterministischer Algorithmus) und eignet sich besonders gut zur Visualisierung von Clustern – jedoch nicht für Distanzvergleiche zwischen Clustern.
@@ -84,16 +74,6 @@ Spectral Embedding baut einen Ähnlichkeitsgraphen zwischen den Datenpunkten auf
 
 <p align="center">
   <img src="plots/spectral_embedding.png" width="800"/>
-</p>
-
----
-
-### LLE – Locally Linear Embedding
-
-LLE nimmt an, dass jeder Punkt durch eine Linearkombination seiner nächsten Nachbarn dargestellt werden kann. Diese lokalen Gewichte werden in 2D beibehalten. Die Methode funktioniert gut bei glatten, gleichmäßig abgetasteten Mannigfaltigkeiten, reagiert aber empfindlich auf Rauschen.
-
-<p align="center">
-  <img src="plots/lle.png" width="800"/>
 </p>
 
 ---

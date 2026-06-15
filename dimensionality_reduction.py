@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import seaborn as sns
 from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE, Isomap, SpectralEmbedding, LocallyLinearEmbedding
+from sklearn.manifold import TSNE, Isomap, SpectralEmbedding
 
 from data_prep import load_data, build_feature_matrix
 
@@ -76,11 +76,6 @@ def run_all():
             "pca.png"
         ),
         (
-            "Randomized PCA",
-            lambda X: PCA(n_components=2, svd_solver="randomized", random_state=42).fit_transform(X),
-            "pca_randomized.png"
-        ),
-        (
             "t-SNE",
             lambda X: TSNE(n_components=2, perplexity=30, random_state=42, max_iter=1000).fit_transform(X),
             "tsne.png"
@@ -94,11 +89,6 @@ def run_all():
             "Spectral Embedding",
             lambda X: SpectralEmbedding(n_components=2, random_state=42).fit_transform(X),
             "spectral_embedding.png"
-        ),
-        (
-            "LLE (Locally Linear Embedding)",
-            lambda X: LocallyLinearEmbedding(n_neighbors=10, n_components=2, random_state=42).fit_transform(X),
-            "lle.png"
         ),
     ]
 

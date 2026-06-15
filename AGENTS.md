@@ -32,11 +32,9 @@ Datenbasis: 834 Songs · 12 Genres · Features: Genre, Jahr, Länge
 | Status | Algorithmus | Ziel |
 |--------|-------------|------|
 | ✅ | **PCA** (Standard, 2D) | Varianz-maximierende Projektion |
-| ✅ | **Randomized PCA** | Schnellere PCA-Variante für größere Feature-Räume |
 | ✅ | **t-SNE** | Ähnliche Songs nah beieinander darstellen (sehr populär in Portfolios) |
 | ✅ | **Isomap** | Geodätische Abstände statt euklidische — curved structure |
 | ✅ | **Spectral Embedding** | Graph-basierte Projektion der Song-Ähnlichkeiten |
-| ✅ | **LLE** (Locally Linear Embedding) | Lokale Nachbarschaften linearisieren |
 
 **Konkreter Output:** 6 Subplots mit denselben Daten, alle eingefärbt nach Genre — direkt vergleichbar.
 
