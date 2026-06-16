@@ -150,18 +150,13 @@ Ziel: Genre eines Songs aus **Erscheinungsjahr und Länge** vorhersagen. Die Dat
 **Was ist der F1-Score?**
 Der F1-Score ist das harmonische Mittel aus zwei Metriken: *Precision* (wie viele der als „Electronic" vorhergesagten Songs sind wirklich Electronic?) und *Recall* (wie viele der echten Electronic-Songs hat das Modell erkannt?). Er liegt zwischen 0 und 1. Der **Macro F1** berechnet den F1 für jedes Genre einzeln und mittelt dann. Ein Modell, das einfach immer „Electronic" vorhersagt, würde ~41% Accuracy erreichen, was erstmal ok klingt, aber relativ nutzlos ist, weil eben gar nicht wirklich versucht wird etwas vorherzusagen.
 
-### Modellvergleich – Macro F1
+### Modellvergleich - Macro F1
 
-random forest = 0.219
-SVC = 0.227
-linear SVC = 0.164
-KNN = 0.188
+SVC rbf (0.227) und Random Forest (0.219) schneiden am besten ab, Linear SVC (0.164) am schlechtesten. Der Unterschied zwischen den Modellen ist aber gering; alle liegen zwischen 0.16 und 0.23. Das zeigt, dass das Bottleneck nicht der Algorithmus ist, sondern die Features: Wenn Jahr und Länge allein Genre nicht erklären können, hilft auch ein besseres Modell nicht weiter.
 
 <p align="center">
   <img src="plots/classification_comparison.png" width="800"/>
 </p>
-
-SVC rbf (0.227) und Random Forest (0.219) schneiden am besten ab, Linear SVC (0.164) am schlechtesten. Der Unterschied zwischen den Modellen ist aber gering — alle liegen zwischen 0.16 und 0.23. Das zeigt, dass das Bottleneck nicht der Algorithmus ist, sondern die Features: Wenn Jahr und Länge allein Genre nicht erklären können, hilft auch ein besseres Modell kaum weiter.
 
 ---
 
@@ -217,54 +212,3 @@ Das Ergebnis ist ähnlich wie bei KNN: Electronic (74%) und Pop (69%) werden am 
 
 ---
 
-## Regression
-
-Ziel: Die **Länge eines Songs** aus Genre und Erscheinungsjahr vorhersagen. Die Features sind Jahr + Genre (One-Hot-kodiert), das Ziel ist die Länge in Sekunden (Mittelwert: 225s, Std: 61s). Bewertet wird mit **R²** (Anteil der erklärten Varianz) und **MAE** (mittlerer absoluter Fehler in Sekunden).
-
-> **Hinweis zu den Scores:** Alle Modelle erzielen ein R² zwischen 0.10 und 0.13. Das bedeutet: Genre und Jahr erklären ca. 10–13 % der Varianz in der Songlänge. Das ist erwartbar — Songlänge hängt von vielen Faktoren ab, die in den Metadaten nicht enthalten sind (z.B. Instrumentierung, Albumkonzept, Label). Ein niedriger R² ist hier kein Fehler, sondern eine ehrliche Aussage über die Grenzen der Datenbasis.
-
-### Modellvergleich – R² und MAE
-
-<p align="center">
-  <img src="plots/regression_comparison.png" width="800"/>
-</p>
-
----
-
-### Ridge Regression
-
-Ridge minimiert den quadratischen Fehler mit einer L2-Regularisierung, die große Koeffizienten bestraft. Dadurch bleibt das Modell stabil, auch wenn Features korreliert sind. Ridge erzielt hier das beste R² (0.131).
-
-<p align="center">
-  <img src="plots/regression_ridge.png" width="800"/>
-</p>
-
----
-
-### Lasso
-
-Lasso verwendet L1-Regularisierung, die nicht nur große Koeffizienten bestraft, sondern irrelevante Features komplett auf 0 setzt — also implizit Feature Selection betreibt. Das Ergebnis ist minimal schlechter als Ridge (R² = 0.126), was darauf hindeutet, dass die meisten Features hier tatsächlich relevant sind.
-
-<p align="center">
-  <img src="plots/regression_lasso.png" width="800"/>
-</p>
-
----
-
-### ElasticNet
-
-ElasticNet kombiniert L1- und L2-Regularisierung (hier 50/50). Es ist ein Kompromiss zwischen Ridge und Lasso — nützlich, wenn viele Features schwach korreliert sind. R² = 0.106.
-
-<p align="center">
-  <img src="plots/regression_elasticnet.png" width="800"/>
-</p>
-
----
-
-### SVR (kernel='linear')
-
-Der Support Vector Regressor mit linearem Kernel sucht eine Hyperplane, die möglichst viele Punkte innerhalb eines Toleranzbereichs (ε-Schlauch) trifft. Hier erzielt er R² = 0.095 bei gleichzeitig niedrigstem MAE (44.0s), was zeigt, dass er die Extremwerte besser ignoriert als die linearen Modelle.
-
-<p align="center">
-  <img src="plots/regression_svr_linear.png" width="800"/>
-</p>
