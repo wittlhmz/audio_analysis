@@ -86,13 +86,15 @@ Das Ergebnis ist leider wenig aufschlussreich. Fast alle Genres werden in die un
 
 ## Clustering
 
-Beim Clustering werden Songs automatisch in Gruppen eingeteilt – ohne vorgegebene Labels. Als Eingabe dienen dieselben Features wie bei der Dimensionsreduktion (Genre, Jahr, Länge). Die Visualisierung erfolgt jeweils über eine PCA-Projektion auf 2D. Zur Bewertung der Clusterqualität wird der **Silhouette-Score** verwendet: Er misst, wie gut ein Punkt zu seinem eigenen Cluster passt im Vergleich zu den anderen Clustern. Werte nahe 1 sind ideal.
+Beim Clustering werden Songs automatisch in Gruppen eingeteilt. Als Eingabe dienen dieselben Features wie bei der Dimensionsreduktion (Genre, Jahr, Länge). Die Visualisierung erfolgt jeweils über eine PCA-Projektion auf 2D. Zur Bewertung der Clusterqualität wird der **Silhouette-Score** verwendet.
 
 ### KMeans
 
-KMeans teilt die Daten in eine vorher festgelegte Anzahl von Clustern (hier k=7). Der Algorithmus minimiert iterativ die Abstände der Punkte zu ihrem jeweiligen Clusterzentrum. Er ist schnell und gut skalierbar, setzt aber sphärische, gleichgroße Cluster voraus.
+KMeans teilt die Daten in eine vorher festgelegte Anzahl von Clustern (hier k=7). Der Algorithmus minimiert iterativ die Abstände der Punkte zu ihrem jeweiligen Clusterzentrum.
 
 **Silhouette-Score: 0.457**
+
+Der beste Silhouette Score wäre bei k=10, was intuitiv Sinn macht, da es auch 10 Genres gibt. Allerdings gibt es auch hier keine neuen Informationen.
 
 <p align="center">
   <img src="plots/clustering_kmeans.png" width="800"/>
@@ -102,7 +104,7 @@ KMeans teilt die Daten in eine vorher festgelegte Anzahl von Clustern (hier k=7)
 
 ### MeanShift
 
-MeanShift benötigt keine vorgegebene Clusteranzahl. Der Algorithmus verschiebt iterativ Kernelpunkte in Richtung der lokalen Datendichte und findet so eigenständig die Anzahl der Cluster. Hier wurden automatisch **11 Cluster** erkannt.
+MeanShift benötigt keine vorgegebene Clusteranzahl. Der Algorithmus verschiebt iterativ Kernelpunkte in Richtung der lokalen Datendichte und findet so eigenständig die Anzahl der Cluster. Hier wurden automatisch **11 Cluster** erkannt. Auch hier entspricht die Anzahl der Cluster etwa der Anzahl von Genres.
 
 **Silhouette-Score: 0.403**
 
@@ -112,9 +114,11 @@ MeanShift benötigt keine vorgegebene Clusteranzahl. Der Algorithmus verschiebt 
 
 ---
 
-### GMM – Gaussian Mixture Model
+### Gaussian Mixture Model
 
-GMM geht davon aus, dass die Daten durch eine Überlagerung mehrerer Normalverteilungen (Gaussians) erzeugt wurden. Im Gegensatz zu KMeans weist GMM jedem Punkt keine harte Clusterzugehörigkeit zu, sondern eine Wahrscheinlichkeit. Das macht das Modell flexibler bei unterschiedlich geformten oder überlappenden Clustern.
+GMM geht davon aus, dass die Daten durch eine Überlagerung mehrerer Normalverteilungen (Gaussians) erzeugt wurden. Im Gegensatz zu KMeans weist GMM jedem Punkt keine harte Clusterzugehörigkeit zu, sondern eine Wahrscheinlichkeit — ein Punkt nahe an einer Clustergrenze kann also "ein bisschen" zu beiden gehören.
+
+Das Ergebnis sieht KMeans allerdings sehr ähnlich, was für diesen Datensatz nicht überrascht: Die Genres bilden bereits klar getrennte Gruppen, sodass die Wahrscheinlichkeitsnuancen kaum einen Unterschied machen. Der leicht niedrigere Silhouette-Score (0.399 vs. 0.457) zeigt sogar, dass KMeans die kompakteren Cluster findet. GMM wäre hier erst dann im Vorteil, wenn die Cluster stark überlappen würden.
 
 **Silhouette-Score: 0.399**
 
@@ -126,7 +130,9 @@ GMM geht davon aus, dass die Daten durch eine Überlagerung mehrerer Normalverte
 
 ### Spectral Clustering
 
-Spectral Clustering baut zunächst einen Ähnlichkeitsgraphen zwischen den Datenpunkten auf und wendet anschließend Clustering auf die Eigenvektoren der Graph-Laplace-Matrix an. Es eignet sich besonders für nicht-konvex geformte Cluster, ist aber rechenintensiver als KMeans. Der niedrige Silhouette-Score zeigt, dass die Cluster hier weniger kompakt sind – was typisch für graphbasierte Methoden auf dieser Datenlage ist.
+Spectral Clustering baut zunächst einen Ähnlichkeitsgraphen zwischen den Datenpunkten auf und wendet anschließend Clustering auf die Eigenvektoren der Graph-Laplace-Matrix an.
+
+Das Ergebnis erklärt den niedrigen Silhouette-Score direkt: Cluster 1 (orange) taucht gleichzeitig in der Mitte des Plots und unten rechts auf — also in zwei komplett verschiedenen Regionen. Das bedeutet, der Algorithmus hat Songs zusammengefasst, die sich eigentlich nicht ähneln. Spectral Clustering optimiert Graphschnitte, keine geometrische Nähe, und das führt hier zu Clustern, die quer durch die natürlichen Genre-Grenzen laufen. Für einen Datensatz mit so klar trennbaren Gruppen wie diesem ist das ein Nachteil. 
 
 **Silhouette-Score: 0.102**
 
