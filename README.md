@@ -87,6 +87,7 @@ Das Ergebnis ist leider wenig aufschlussreich. Fast alle Genres werden in die un
 ## Clustering
 
 Beim Clustering werden Songs automatisch in Gruppen eingeteilt. Als Eingabe dienen dieselben Features wie bei der Dimensionsreduktion (Genre, Jahr, Länge). Die Visualisierung erfolgt jeweils über eine PCA-Projektion auf 2D. Zur Bewertung der Clusterqualität wird der **Silhouette-Score** verwendet.
+Da die Daten bereits komplett gelabeled sind, sind die Erkenntnisse nicht wirklich neu, aber dieses Projekt hat mir einen besseren Überblick über die einzelnen Methoden geliefert und welche Grenzen welche Methoden haben.
 
 ### KMeans
 
@@ -116,7 +117,7 @@ MeanShift benötigt keine vorgegebene Clusteranzahl. Der Algorithmus verschiebt 
 
 ### Gaussian Mixture Model
 
-GMM geht davon aus, dass die Daten durch eine Überlagerung mehrerer Normalverteilungen (Gaussians) erzeugt wurden. Im Gegensatz zu KMeans weist GMM jedem Punkt keine harte Clusterzugehörigkeit zu, sondern eine Wahrscheinlichkeit — ein Punkt nahe an einer Clustergrenze kann also "ein bisschen" zu beiden gehören.
+GMM geht davon aus, dass die Daten durch eine Überlagerung mehrerer Normalverteilungen (Gaussians) erzeugt wurden. Im Gegensatz zu KMeans weist GMM jedem Punkt keine harte Clusterzugehörigkeit zu, sondern eine Wahrscheinlichkeit, sodass ein Punkt nahe an einer Clustergrenze kann also "ein bisschen" zu beiden gehören kann.
 
 Das Ergebnis sieht KMeans allerdings sehr ähnlich, was für diesen Datensatz nicht überrascht: Die Genres bilden bereits klar getrennte Gruppen, sodass die Wahrscheinlichkeitsnuancen kaum einen Unterschied machen. Der leicht niedrigere Silhouette-Score (0.399 vs. 0.457) zeigt sogar, dass KMeans die kompakteren Cluster findet. GMM wäre hier erst dann im Vorteil, wenn die Cluster stark überlappen würden.
 
@@ -132,7 +133,7 @@ Das Ergebnis sieht KMeans allerdings sehr ähnlich, was für diesen Datensatz ni
 
 Spectral Clustering baut zunächst einen Ähnlichkeitsgraphen zwischen den Datenpunkten auf und wendet anschließend Clustering auf die Eigenvektoren der Graph-Laplace-Matrix an.
 
-Das Ergebnis erklärt den niedrigen Silhouette-Score direkt: Cluster 1 (orange) taucht gleichzeitig in der Mitte des Plots und unten rechts auf — also in zwei komplett verschiedenen Regionen. Das bedeutet, der Algorithmus hat Songs zusammengefasst, die sich eigentlich nicht ähneln. Spectral Clustering optimiert Graphschnitte, keine geometrische Nähe, und das führt hier zu Clustern, die quer durch die natürlichen Genre-Grenzen laufen. Für einen Datensatz mit so klar trennbaren Gruppen wie diesem ist das ein Nachteil. 
+Das Ergebnis erklärt auch den niedrigen Silhouette-Score, da Cluster 1 (orange) gleichzeitig in der Mitte des Plots und unten rechts auftaucht. Das bedeutet, der Algorithmus hat Songs zusammengefasst, die sich eigentlich nicht ähneln. Spectral Clustering optimiert Graphschnitte, keine geometrische Nähe, und das führt hier zu Clustern, die quer durch die natürlichen Genre-Grenzen laufen. Für einen Datensatz mit so klar trennbaren Gruppen wie diesem ist das ein Nachteil. 
 
 **Silhouette-Score: 0.102**
 
@@ -146,7 +147,11 @@ Das Ergebnis erklärt den niedrigen Silhouette-Score direkt: Cluster 1 (orange) 
 
 Ziel: Genre eines Songs aus **Erscheinungsjahr und Länge** vorhersagen. Die Daten wurden 80/20 in Trainings- und Testset aufgeteilt (stratifiziert nach Genre). Da die Klassen stark unbalanciert sind (Electronic: 339 Songs, Alternative: 9), wurden alle Modelle mit `class_weight="balanced"` trainiert.
 
-> **Hinweis zu den Scores:** Der Macro F1 liegt bei allen Modellen zwischen 0.16 und 0.23 — das ist erwartet. Jahr und Länge allein reichen nicht aus, um Genre zuverlässig vorherzusagen. Die Modelle lernen vor allem Electronic und Pop (die dominanten Klassen). Der Wert liegt dabei, zu zeigen, was mit minimalen Features möglich ist — und wo die Grenzen der Daten liegen.
+**Was ist der F1-Score?**
+Der F1-Score ist das harmonische Mittel aus zwei Metriken: *Precision* (wie viele der als „Electronic" vorhergesagten Songs sind wirklich Electronic?) und *Recall* (wie viele der echten Electronic-Songs hat das Modell erkannt?). Er liegt zwischen 0 und 1. Der **Macro F1** berechnet den F1 für jedes Genre einzeln und mittelt dann — alle Genres zählen gleich, egal wie groß sie sind. Das ist bei unbalancierten Daten entscheidend: Ein Modell, das einfach immer „Electronic" vorhersagt, würde ~41% Accuracy erreichen — klingt ok, ist aber nutzlos. Der Macro F1 würde es sofort bestrafen, weil alle anderen Genres komplett ignoriert werden.
+
+**Wie liest man die Confusion Matrix?**
+Jede Zeile steht für ein *tatsächliches* Genre, jede Spalte für ein *vorhergesagtes*. Der Prozentwert zeigt, wie oft das Modell bei Songs dieses Genres eine bestimmte Vorhersage gemacht hat. Die dunklen Felder auf der Diagonale sind richtige Vorhersagen — alles außerhalb ist ein Fehler. Zum Beispiel: Alternative (Zeile) → 100% in der Electronic-Spalte bedeutet, dass das Modell jeden Alternative-Song als Electronic vorhergesagt hat.
 
 ### Modellvergleich – Macro F1
 
@@ -160,6 +165,8 @@ Ziel: Genre eines Songs aus **Erscheinungsjahr und Länge** vorhersagen. Die Dat
 
 KNN klassifiziert einen Punkt anhand der k nächsten Nachbarn im Feature-Raum. Hier k=7. Der Algorithmus ist nicht-parametrisch und einfach zu verstehen, reagiert aber sensibel auf unbalancierte Klassen.
 
+Electronic (85%) und Pop (72%) werden noch relativ gut erkannt. Dance hingegen wird zu 53% als Electronic klassifiziert — das macht Sinn, weil Dance-Songs im Feature-Raum (Jahr + Länge) sehr nah an Electronic liegen. Kleine Genres wie Bass Music, Indie und Alternative werden zu 100% als Electronic vorhergesagt: Das Modell findet in ihrer Nachbarschaft fast nur Electronic-Songs, weil die Klasse so dominant ist.
+
 <p align="center">
   <img src="plots/classification_kneighbors.png" width="800"/>
 </p>
@@ -169,6 +176,8 @@ KNN klassifiziert einen Punkt anhand der k nächsten Nachbarn im Feature-Raum. H
 ### Linear SVC
 
 Der Linear Support Vector Classifier sucht eine lineare Trennhyperplane zwischen den Klassen. Er ist effizient und gut für hochdimensionale Räume geeignet. Mit nur zwei Features (Jahr, Länge) stößt er hier schnell an seine Grenzen.
+
+Das Modell ist stark auf Electronic (91%) und Pop (89%) spezialisiert — fast alles andere wird in diese beiden Kategorien sortiert. Dance wird zu 73% als Electronic vorhergesagt. Das liegt daran, dass eine lineare Trennlinie bei nur zwei Features keine feine Unterscheidung zwischen ähnlichen Genres ermöglicht. Der niedrigste Macro F1 (0.164) der vier Modelle spiegelt das wider.
 
 <p align="center">
   <img src="plots/classification_linear_svc.png" width="800"/>
@@ -180,6 +189,8 @@ Der Linear Support Vector Classifier sucht eine lineare Trennhyperplane zwischen
 
 Der SVC mit RBF-Kernel kann nicht-lineare Entscheidungsgrenzen lernen. Das macht ihn flexibler als den linearen SVC, führt aber bei wenigen Features nicht zwingend zu besseren Ergebnissen.
 
+Die Ergebnisse sind die unberechenbarsten der vier Modelle. Electronic wird nur zu 40% korrekt erkannt — dafür wird Bass Music zu 100% richtig klassifiziert. Rock wird zu 100% als Party vorhergesagt. Der rbf-Kernel hat offenbar sehr ungewöhnliche nicht-lineare Grenzen gelernt, die mit der echten Struktur der Daten wenig zu tun haben. Trotzdem erreicht er mit 0.227 den höchsten Macro F1, weil er bei einigen kleinen Klassen besser abschneidet als die anderen Modelle.
+
 <p align="center">
   <img src="plots/classification_svc_rbf.png" width="800"/>
 </p>
@@ -189,6 +200,8 @@ Der SVC mit RBF-Kernel kann nicht-lineare Entscheidungsgrenzen lernen. Das macht
 ### Random Forest
 
 Random Forest trainiert eine Vielzahl von Entscheidungsbäumen auf zufälligen Teilmengen der Daten und mittelt deren Vorhersagen. Zusätzlich zur Confusion Matrix liefert er Feature Importances — hier zeigt sich, welches der beiden Features (Jahr vs. Länge) mehr zur Klassifikation beiträgt.
+
+Das Ergebnis ist ähnlich wie bei KNN: Electronic (74%) und Pop (69%) werden am besten erkannt, Dance landet zu 40% fälschlicherweise bei Electronic. Alternative wird wieder zu 100% als Electronic eingestuft. Der Vorteil des Random Forest zeigt sich weniger in den Confusion-Matrix-Werten als in der Feature-Importance-Grafik darunter — sie zeigt, wie das Modell seine Entscheidungen trifft.
 
 <p align="center">
   <img src="plots/classification_random_forest.png" width="800"/>
