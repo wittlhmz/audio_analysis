@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
@@ -94,7 +95,10 @@ def run_all():
 
     for name, transform, filename in methods:
         print(f"Berechne {name}...")
+        t0 = time.perf_counter()
         X_2d = transform(X_scaled)
+        elapsed = time.perf_counter() - t0
+        print(f"  Laufzeit {name}: {elapsed:.2f}s")
         make_plot(X_2d, genres, name, filename)
 
     print("\nFertig. Alle Plots in ./plots/")

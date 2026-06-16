@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -145,12 +146,16 @@ def run_all():
 
     for name, clf in classifiers:
         print(f"\nTrainiere {name}...")
+        t0 = time.perf_counter()
         clf.fit(X_train, y_train)
         y_pred = clf.predict(X_test)
+        elapsed = time.perf_counter() - t0
+        print(f"  Laufzeit {name}: {elapsed:.2f}s")
+        results[name] = {"macro_f1": 0, "runtime": elapsed}
 
         report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
         macro_f1 = report["macro avg"]["f1-score"]
-        results[name] = {"macro_f1": macro_f1}
+        results[name]["macro_f1"] = macro_f1
 
         print(f"  Macro F1: {macro_f1:.3f}")
         print(classification_report(y_test, y_pred, zero_division=0))

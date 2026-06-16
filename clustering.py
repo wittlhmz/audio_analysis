@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -76,28 +77,36 @@ def run_all():
 
     # KMeans
     print("Berechne KMeans...")
+    t0 = time.perf_counter()
     km = KMeans(n_clusters=7, random_state=42, n_init=10)
     labels_km = km.fit_predict(X_scaled)
+    print(f"  Laufzeit KMeans: {time.perf_counter() - t0:.2f}s")
     make_cluster_plot(X_2d, labels_km, "KMeans", "clustering_kmeans.png", n_clusters=7)
 
     # MeanShift
     print("Berechne MeanShift (bandwidth-Schätzung läuft...)...")
+    t0 = time.perf_counter()
     bw = estimate_bandwidth(X_scaled, quantile=0.15, n_samples=500, random_state=42)
     ms = MeanShift(bandwidth=bw, bin_seeding=True)
     labels_ms = ms.fit_predict(X_scaled)
     n_ms = len(set(labels_ms))
+    print(f"  Laufzeit MeanShift: {time.perf_counter() - t0:.2f}s")
     make_cluster_plot(X_2d, labels_ms, "MeanShift", "clustering_meanshift.png", n_clusters=n_ms)
 
     # GMM
     print("Berechne GMM (Gaussian Mixture Model)...")
+    t0 = time.perf_counter()
     gmm = GaussianMixture(n_components=7, random_state=42)
     labels_gmm = gmm.fit_predict(X_scaled)
+    print(f"  Laufzeit GMM: {time.perf_counter() - t0:.2f}s")
     make_cluster_plot(X_2d, labels_gmm, "GMM – Gaussian Mixture Model", "clustering_gmm.png", n_clusters=7)
 
     # Spectral Clustering
     print("Berechne Spectral Clustering...")
+    t0 = time.perf_counter()
     sc = SpectralClustering(n_clusters=7, random_state=42, affinity="nearest_neighbors", n_neighbors=10)
     labels_sc = sc.fit_predict(X_scaled)
+    print(f"  Laufzeit Spectral Clustering: {time.perf_counter() - t0:.2f}s")
     make_cluster_plot(X_2d, labels_sc, "Spectral Clustering", "clustering_spectral.png", n_clusters=7)
 
     print("\nFertig. Alle Cluster-Plots in ./plots/")
