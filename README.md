@@ -148,24 +148,28 @@ Das Ergebnis erklärt auch den niedrigen Silhouette-Score, da Cluster 1 (orange)
 Ziel: Genre eines Songs aus **Erscheinungsjahr und Länge** vorhersagen. Die Daten wurden 80/20 in Trainings- und Testset aufgeteilt (stratifiziert nach Genre). Da die Klassen stark unbalanciert sind (Electronic: 339 Songs, Alternative: 9), wurden alle Modelle mit `class_weight="balanced"` trainiert.
 
 **Was ist der F1-Score?**
-Der F1-Score ist das harmonische Mittel aus zwei Metriken: *Precision* (wie viele der als „Electronic" vorhergesagten Songs sind wirklich Electronic?) und *Recall* (wie viele der echten Electronic-Songs hat das Modell erkannt?). Er liegt zwischen 0 und 1. Der **Macro F1** berechnet den F1 für jedes Genre einzeln und mittelt dann — alle Genres zählen gleich, egal wie groß sie sind. Das ist bei unbalancierten Daten entscheidend: Ein Modell, das einfach immer „Electronic" vorhersagt, würde ~41% Accuracy erreichen — klingt ok, ist aber nutzlos. Der Macro F1 würde es sofort bestrafen, weil alle anderen Genres komplett ignoriert werden.
-
-**Wie liest man die Confusion Matrix?**
-Jede Zeile steht für ein *tatsächliches* Genre, jede Spalte für ein *vorhergesagtes*. Der Prozentwert zeigt, wie oft das Modell bei Songs dieses Genres eine bestimmte Vorhersage gemacht hat. Die dunklen Felder auf der Diagonale sind richtige Vorhersagen — alles außerhalb ist ein Fehler. Zum Beispiel: Alternative (Zeile) → 100% in der Electronic-Spalte bedeutet, dass das Modell jeden Alternative-Song als Electronic vorhergesagt hat.
+Der F1-Score ist das harmonische Mittel aus zwei Metriken: *Precision* (wie viele der als „Electronic" vorhergesagten Songs sind wirklich Electronic?) und *Recall* (wie viele der echten Electronic-Songs hat das Modell erkannt?). Er liegt zwischen 0 und 1. Der **Macro F1** berechnet den F1 für jedes Genre einzeln und mittelt dann. Ein Modell, das einfach immer „Electronic" vorhersagt, würde ~41% Accuracy erreichen, was erstmal ok klingt, aber relativ nutzlos ist, weil eben gar nicht wirklich versucht wird etwas vorherzusagen.
 
 ### Modellvergleich – Macro F1
+
+random forest = 0.219
+SVC = 0.227
+linear SVC = 0.164
+KNN = 0.188
 
 <p align="center">
   <img src="plots/classification_comparison.png" width="800"/>
 </p>
 
+SVC rbf (0.227) und Random Forest (0.219) schneiden am besten ab, Linear SVC (0.164) am schlechtesten. Der Unterschied zwischen den Modellen ist aber gering — alle liegen zwischen 0.16 und 0.23. Das zeigt, dass das Bottleneck nicht der Algorithmus ist, sondern die Features: Wenn Jahr und Länge allein Genre nicht erklären können, hilft auch ein besseres Modell kaum weiter.
+
 ---
 
 ### KNeighbors Classifier
 
-KNN klassifiziert einen Punkt anhand der k nächsten Nachbarn im Feature-Raum. Hier k=7. Der Algorithmus ist nicht-parametrisch und einfach zu verstehen, reagiert aber sensibel auf unbalancierte Klassen.
+KNN klassifiziert einen Punkt anhand der k nächsten Nachbarn im Feature-Raum. Hier k=7. 
 
-Electronic (85%) und Pop (72%) werden noch relativ gut erkannt. Dance hingegen wird zu 53% als Electronic klassifiziert — das macht Sinn, weil Dance-Songs im Feature-Raum (Jahr + Länge) sehr nah an Electronic liegen. Kleine Genres wie Bass Music, Indie und Alternative werden zu 100% als Electronic vorhergesagt: Das Modell findet in ihrer Nachbarschaft fast nur Electronic-Songs, weil die Klasse so dominant ist.
+Electronic (85%) und Pop (72%) werden noch relativ gut erkannt. Dance hingegen wird zu 53% als Electronic klassifiziert; das macht Sinn, weil Dance-Songs im Feature-Raum (Jahr + Länge) sehr nah an Electronic liegen. Auf der anderen Seite werden kleine Genres wie Bass Music, Indie und Alternative zu 100% als Electronic vorhergesagt, was daran liegt, dass das Modell in ihrer Nachbarschaft fast nur Electronic-Songs findet, weil die Klasse so dominant ist.
 
 <p align="center">
   <img src="plots/classification_kneighbors.png" width="800"/>
@@ -175,9 +179,9 @@ Electronic (85%) und Pop (72%) werden noch relativ gut erkannt. Dance hingegen w
 
 ### Linear SVC
 
-Der Linear Support Vector Classifier sucht eine lineare Trennhyperplane zwischen den Klassen. Er ist effizient und gut für hochdimensionale Räume geeignet. Mit nur zwei Features (Jahr, Länge) stößt er hier schnell an seine Grenzen.
+Der Linear Support Vector Classifier sucht eine lineare Trennhyperplane zwischen den Klassen. Er ist effizient und gut für hochdimensionale Räume geeignet. Mit nur zwei Features (Jahr, Länge) stößt er hier an seine Grenzen.
 
-Das Modell ist stark auf Electronic (91%) und Pop (89%) spezialisiert — fast alles andere wird in diese beiden Kategorien sortiert. Dance wird zu 73% als Electronic vorhergesagt. Das liegt daran, dass eine lineare Trennlinie bei nur zwei Features keine feine Unterscheidung zwischen ähnlichen Genres ermöglicht. Der niedrigste Macro F1 (0.164) der vier Modelle spiegelt das wider.
+Das Modell ist stark auf Electronic (91%) und Pop (89%) spezialisiert. Dance wird zu 73% als Electronic vorhergesagt. Das liegt daran, dass eine lineare Trennlinie bei nur zwei Features keine feine Unterscheidung zwischen ähnlichen Genres ermöglicht. Der niedrigste Macro F1 (0.164) der vier Modelle spiegelt das wider.
 
 <p align="center">
   <img src="plots/classification_linear_svc.png" width="800"/>
@@ -189,7 +193,7 @@ Das Modell ist stark auf Electronic (91%) und Pop (89%) spezialisiert — fast a
 
 Der SVC mit RBF-Kernel kann nicht-lineare Entscheidungsgrenzen lernen. Das macht ihn flexibler als den linearen SVC, führt aber bei wenigen Features nicht zwingend zu besseren Ergebnissen.
 
-Die Ergebnisse sind die unberechenbarsten der vier Modelle. Electronic wird nur zu 40% korrekt erkannt — dafür wird Bass Music zu 100% richtig klassifiziert. Rock wird zu 100% als Party vorhergesagt. Der rbf-Kernel hat offenbar sehr ungewöhnliche nicht-lineare Grenzen gelernt, die mit der echten Struktur der Daten wenig zu tun haben. Trotzdem erreicht er mit 0.227 den höchsten Macro F1, weil er bei einigen kleinen Klassen besser abschneidet als die anderen Modelle.
+Die Ergebnisse sind die unberechenbarsten der vier Modelle. Electronic wird nur zu 40% korrekt erkannt, aber dafür wird Bass Music zu 100% richtig klassifiziert. Rock wird zu 100% als Party vorhergesagt. Der rbf-Kernel hat offenbar sehr ungewöhnliche nicht-lineare Grenzen gelernt, die mit der echten Struktur der Daten wenig zu tun haben. Trotzdem erreicht er mit 0.227 den höchsten Macro F1, weil er bei einigen kleinen Klassen besser abschneidet als die anderen Modelle.
 
 <p align="center">
   <img src="plots/classification_svc_rbf.png" width="800"/>
@@ -199,9 +203,9 @@ Die Ergebnisse sind die unberechenbarsten der vier Modelle. Electronic wird nur 
 
 ### Random Forest
 
-Random Forest trainiert eine Vielzahl von Entscheidungsbäumen auf zufälligen Teilmengen der Daten und mittelt deren Vorhersagen. Zusätzlich zur Confusion Matrix liefert er Feature Importances — hier zeigt sich, welches der beiden Features (Jahr vs. Länge) mehr zur Klassifikation beiträgt.
+Random Forest trainiert eine Vielzahl von Entscheidungsbäumen auf zufälligen Teilmengen der Daten und mittelt deren Vorhersagen. Zusätzlich zur Confusion Matrix liefert er Feature Importances, die aufzeigen welche der beiden Features (Jahr vs. Länge) mehr zur Klassifikation beiträgt.
 
-Das Ergebnis ist ähnlich wie bei KNN: Electronic (74%) und Pop (69%) werden am besten erkannt, Dance landet zu 40% fälschlicherweise bei Electronic. Alternative wird wieder zu 100% als Electronic eingestuft. Der Vorteil des Random Forest zeigt sich weniger in den Confusion-Matrix-Werten als in der Feature-Importance-Grafik darunter — sie zeigt, wie das Modell seine Entscheidungen trifft.
+Das Ergebnis ist ähnlich wie bei KNN: Electronic (74%) und Pop (69%) werden am besten erkannt, Dance landet zu 40% fälschlicherweise bei Electronic. Alternative wird wieder zu 100% als Electronic eingestuft. Der Vorteil des Random Forest zeigt sich weniger in den Confusion-Matrix-Werten als in der Feature-Importance-Grafik, da sie zeigt, wie das Modell seine Entscheidungen trifft.
 
 <p align="center">
   <img src="plots/classification_random_forest.png" width="800"/>
