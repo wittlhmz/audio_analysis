@@ -4,6 +4,12 @@
 
 Dieses Projekt wurde als Lernprojekt erstellt, mit dem Ziel, praktische Erfahrungen im Umgang mit Datenbanken, Datenaufbereitung und Datenanalyse zu sammeln. Auch wenn schon Erfahrung aus dem Studium vorhanden ist, beruht diese eher auf theoretischer Natur und hat mit der Praxis zum Teil wenig zu tun.
 
+## Ergebnisse
+
+- Datenaufbereitung war mit Abstand am aufwändigsten
+- Viele Ergebnisse haben keinen wirklichen Nutzen, da es zu wenige Feature gibt (z.B. wäre die Tonart noch interessant gewesen im Klassifizierungsteil
+- Insgesamt hat das Projekt mir nochmal einen guten Überblick über Methoden geliefert und über python-Programmierung im Allgemeinen (scikit & plotly)
+
 ---
 
 ## Datenerhebung
