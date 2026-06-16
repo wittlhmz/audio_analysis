@@ -1,5 +1,7 @@
 venv/
 __pycache__/
 .idea/
+.claude/
 tmp_*.py
 *.pyc
+AGENTS.md
